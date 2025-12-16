@@ -1,0 +1,681 @@
+<!DOCTYPE html>
+<html lang="kk">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Орбұлақ: Ұлы Жеңіс</title>
+    <link href="https://fonts.googleapis.com/css2?family=Montserrat:wght@400;600;800&display=swap" rel="stylesheet">
+    <style>
+        :root {
+            --primary-blue: #0984e3;
+            --dark-blue: #0a3d62;
+            --light-blue: #74b9ff;
+            --correct-green: #27ae60;
+            --wrong-red: #c0392b;
+            --gold: #f1c40f;
+            --silver: #bdc3c7;
+            --bronze: #d35400;
+        }
+
+        /* БЕТТІҢ АШЫЛУ АНИМАЦИЯСЫ (BATTLE.HTML СИЯҚТЫ) */
+        body {
+            margin: 0;
+            padding: 0;
+            font-family: 'Montserrat', sans-serif;
+            background: #000428; 
+            background: linear-gradient(to right, #34495e, #000428);
+            color: white;
+            min-height: 100vh;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            overflow-x: hidden;
+            user-select: none;
+            
+            /* Анимация үшін */
+            opacity: 0; 
+            transition: opacity 1s ease;
+        }
+
+        body.loaded {
+            opacity: 1;
+        }
+
+        /* КРЕСТИК (ШЫҒУ ТҮЙМЕСІ - 1 в 1) */
+        .back-btn {
+            position: absolute;
+            top: 20px;
+            right: 30px;
+            font-size: 40px;
+            color: rgba(255, 255, 255, 0.8);
+            text-decoration: none;
+            transition: 0.3s;
+            cursor: pointer;
+            z-index: 200;
+            font-weight: bold;
+            font-family: Arial, sans-serif;
+            text-shadow: 0 0 10px rgba(0,0,0,0.8);
+        }
+
+        .back-btn:hover {
+            color: #e74c3c; 
+            transform: scale(1.2);
+        }
+
+        .screen {
+            display: none;
+            flex-direction: column;
+            align-items: center;
+            justify-content: center;
+            width: 90%;
+            max-width: 900px;
+            text-align: center;
+            padding: 20px 0;
+            opacity: 0;
+            transition: opacity 0.4s ease-in-out;
+        }
+
+        .screen.active { 
+            display: flex; 
+            opacity: 1; 
+        }
+
+        .fade-content {
+            opacity: 1;
+            transition: opacity 0.3s ease-in-out;
+            width: 100%;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+        }
+        .fade-content.hidden { opacity: 0; }
+
+        .hero-image {
+            width: 200px; 
+            height: 200px;
+            object-fit: cover;
+            border-radius: 50%;
+            border: 4px solid var(--primary-blue);
+            box-shadow: 0 0 20px var(--primary-blue);
+            margin-bottom: 20px;
+            animation: pulse 3s infinite;
+        }
+
+        h1 {
+            font-size: 3rem;
+            text-transform: uppercase;
+            letter-spacing: 2px;
+            text-shadow: 0 0 20px #0984e3;
+            margin-bottom: 20px;
+            margin-top: 0;
+        }
+
+        .btn {
+            background: var(--primary-blue);
+            color: white;
+            border: none;
+            padding: 15px 40px;
+            font-size: 1.2rem;
+            border-radius: 50px;
+            cursor: pointer;
+            transition: 0.3s;
+            box-shadow: 0 0 15px var(--primary-blue);
+            font-weight: bold;
+            margin: 10px;
+        }
+        .btn:hover { transform: scale(1.05); background: var(--light-blue); }
+
+        .hud {
+            display: flex; justify-content: space-between; width: 100%;
+            margin-bottom: 20px; font-size: 1.2rem; font-weight: bold;
+            background: rgba(0,0,0,0.3); padding: 15px; border-radius: 15px;
+        }
+
+        .question-box {
+            background: rgba(10, 61, 98, 0.8);
+            padding: 20px; 
+            border-radius: 20px;
+            border: 2px solid var(--light-blue);
+            margin-bottom: 25px; 
+            width: 100%;
+            backdrop-filter: blur(10px);
+            box-shadow: 0 10px 30px rgba(0,0,0,0.5);
+            height: 160px; 
+            display: flex; 
+            align-items: center; 
+            justify-content: center;
+            overflow: hidden;
+        }
+
+        .question-text { 
+            font-size: 1.3rem; 
+            margin: 0; 
+            line-height: 1.4; 
+            max-height: 100%;
+            overflow-y: auto; 
+        }
+
+        .answers-grid {
+            display: grid; grid-template-columns: repeat(2, 1fr);
+            gap: 15px; width: 100%;
+        }
+
+        .answer-btn {
+            background: rgba(255, 255, 255, 0.1);
+            border: 1px solid var(--primary-blue);
+            color: white; padding: 15px; border-radius: 10px;
+            font-size: 1rem; cursor: pointer; transition: 0.2s;
+            display: flex; align-items: center; justify-content: center;
+            min-height: 60px; font-weight: 600;
+        }
+        .answer-btn:hover { background: var(--primary-blue); }
+        .answer-btn.correct { background: var(--correct-green) !important; border-color: #2ecc71; transform: scale(1.02); }
+        .answer-btn.wrong { background: var(--wrong-red) !important; border-color: #e74c3c; opacity: 0.7; }
+
+        .scroll-box {
+            background: rgba(0, 0, 0, 0.6);
+            padding: 20px; border-radius: 15px;
+            width: 100%; 
+            border: 1px solid var(--primary-blue);
+            margin-bottom: 20px;
+        }
+
+        table { width: 100%; border-collapse: separate; border-spacing: 0 5px; color: white; }
+        th { padding: 15px; text-align: left; color: var(--light-blue); border-bottom: 2px solid var(--primary-blue); }
+        td { padding: 12px; background: rgba(255,255,255,0.05); }
+        
+        .rank-1 td { background: linear-gradient(90deg, rgba(241, 196, 15, 0.2), transparent); color: var(--gold); font-weight: bold; border: 1px solid var(--gold); }
+        .rank-2 td { background: linear-gradient(90deg, rgba(189, 195, 199, 0.2), transparent); color: var(--silver); font-weight: bold; }
+        .rank-3 td { background: linear-gradient(90deg, rgba(211, 84, 0, 0.2), transparent); color: var(--bronze); font-weight: bold; }
+
+        .user-result-row {
+            margin-top: 15px; background: var(--dark-blue); border: 2px dashed var(--light-blue);
+            padding: 15px; border-radius: 10px; display: flex; justify-content: space-between;
+            align-items: center; font-weight: bold; color: white;
+            box-shadow: 0 0 15px rgba(9, 132, 227, 0.3);
+        }
+
+        .mistake-item { border-bottom: 1px solid rgba(255,255,255,0.2); padding: 15px; text-align: left; }
+        .mistake-q { color: var(--light-blue); font-weight: bold; margin-bottom: 5px; }
+        .mistake-wrong { color: #e74c3c; font-size: 0.9rem; }
+        .mistake-right { color: #2ecc71; font-weight: bold; font-size: 0.9rem; }
+
+        #modal-overlay {
+            position: fixed; top: 0; left: 0; width: 100%; height: 100%;
+            background: rgba(0,0,0,0.9); display: none; justify-content: center; align-items: center; z-index: 100;
+        }
+        .modal-content {
+            background: var(--dark-blue); padding: 40px; border-radius: 20px;
+            text-align: center; border: 2px solid var(--primary-blue);
+            box-shadow: 0 0 30px rgba(9, 132, 227, 0.5);
+        }
+
+        input[type="text"] {
+            padding: 10px; font-size: 1.2rem; border-radius: 5px; border: none;
+            margin-top: 15px; width: 80%; text-align: center;
+        }
+
+        #loading-text { color: yellow; display: none; margin-top:10px;}
+
+        @keyframes pulse { 0% { box-shadow: 0 0 0 0 rgba(9, 132, 227, 0.7); } 70% { box-shadow: 0 0 0 20px rgba(9, 132, 227, 0); } 100% { box-shadow: 0 0 0 0 rgba(9, 132, 227, 0); } }
+        @media (max-width: 600px) { .answers-grid { grid-template-columns: 1fr; } h1 { font-size: 2rem; } .question-box { height: auto; min-height: 150px; } }
+    </style>
+</head>
+<body onload="document.body.classList.add('loaded')">
+
+    <a class="back-btn" onclick="smoothExit()">&times;</a>
+
+    <div id="start-screen" class="screen active">
+        <img src="photo_2025-12-01_20-12-59.jpg" alt="Batyr" class="hero-image">
+        
+        <h1>ОРБҰЛАҚ ШАЙҚАСЫ </h1>
+        <p style="font-size: 1.2rem; margin-bottom: 30px; opacity: 0.9;">20 Сұрақ | Қиын деңгей</p>
+        <button class="btn" id="startBtn">ОЙЫНДЫ БАСТАУ</button>
+        <button class="btn" id="lbBtn" style="background: transparent; border: 2px solid var(--primary-blue);">🏆 ҮЗДІКТЕР</button>
+    </div>
+
+    <div id="quiz-screen" class="screen">
+        <div class="hud">
+            <span id="progressText">Сұрақ: 1/20</span>
+            <span id="timerText">00:00</span>
+        </div>
+        
+        <div id="quiz-content" class="fade-content">
+            <div class="question-box">
+                <p id="question" class="question-text">Сұрақ...</p>
+            </div>
+            <div id="answers" class="answers-grid"></div>
+        </div>
+    </div>
+
+    <div id="result-screen" class="screen">
+        <h1 id="result-title">ОЙЫН АЯҚТАЛДЫ</h1>
+        <p id="score-text" style="font-size: 2rem; font-weight: bold;">0 / 20</p>
+        <p id="time-text" style="color: var(--light-blue); margin-bottom: 20px;">Уақыт: 00:00</p>
+        
+        <div id="fail-message" style="display:none; color: #e74c3c; margin-bottom: 20px; font-weight:bold;">
+            Лидерлер қатарына кіру үшін 20/20 жинау керек!
+        </div>
+
+        <button class="btn" onclick="location.reload()">ҚАЙТА ОЙНАУ</button>
+        <button class="btn" id="reviewBtn" style="background: #e67e22;">ҚАТЕЛЕРМЕН ЖҰМЫС</button>
+        <button class="btn" id="resultLbBtn" style="background: transparent; border: 2px solid white;">🏆 НӘТИЖЕНІ КӨРУ</button>
+    </div>
+
+    <div id="review-screen" class="screen">
+        <h1>ҚАТЕЛЕР ТІЗІМІ</h1>
+        <div class="scroll-box" id="review-box" style="max-height: 400px; overflow-y: auto;"></div>
+        <button class="btn" onclick="document.getElementById('review-screen').classList.remove('active'); document.getElementById('result-screen').classList.add('active');">АРТҚА</button>
+    </div>
+
+    <div id="leaderboard-screen" class="screen">
+        <h1>🏆 ҮЗДІКТЕР</h1>
+        <p id="loading-text">Деректер жүктелуде...</p>
+        
+        <div class="scroll-box">
+            <table id="leaderboard-table">
+                </table>
+        </div>
+
+        <div id="my-result-row" class="user-result-row" style="display: none;">
+            <span>11. СІЗ (Top 10-ға кірмедіңіз)</span>
+            <span id="my-time-display">--:--</span>
+        </div>
+
+        <button class="btn" onclick="location.reload()" style="margin-top: 20px;">МӘЗІРГЕ ОРАЛУ</button>
+    </div>
+
+    <div id="modal-overlay">
+        <div class="modal-content">
+            <h2 style="color: var(--gold);">ЖЕҢІС! 🥇</h2>
+            <p>Сіз үздік 10-дыққа кірдіңіз!</p>
+            <input type="text" id="username" placeholder="Есіміңіз..." maxlength="15">
+            <br><br>
+            <button class="btn" id="saveScoreBtn">САҚТАУ</button>
+        </div>
+    </div>
+
+    <script>
+        function smoothExit() {
+            document.body.style.opacity = '0';
+            setTimeout(() => {
+                sessionStorage.setItem('skipIntro', 'true');
+                window.location.href = 'index.html';
+            }, 1000);
+        }
+    </script>
+
+    <script type="module">
+        import { initializeApp } from "https://www.gstatic.com/firebasejs/10.7.1/firebase-app.js";
+        import { getFirestore, collection, addDoc, getDocs, query, orderBy, limit } from "https://www.gstatic.com/firebasejs/10.7.1/firebase-firestore.js";
+
+        const firebaseConfig = {
+            apiKey: "AIzaSyBnKoa0XwFEWVgtHSZBOHmJliK-0Rx1Ums",
+            authDomain: "quiz-be514.firebaseapp.com",
+            projectId: "quiz-be514",
+            storageBucket: "quiz-be514.firebasestorage.app",
+            messagingSenderId: "497330012390",
+            appId: "1:497330012390:web:ca18b9b6192158a4f4bb27",
+            measurementId: "G-RBRVNN8V7X"
+        };
+
+        const app = initializeApp(firebaseConfig);
+        const db = getFirestore(app);
+        const LEADERBOARD_COLLECTION = "leaderboard";
+
+        // СҰРАҚТАР БАЗАСЫ (60)
+        const factualQuestions = [
+            { q: "Орбұлақ шайқасы нақты қай жылы болды?", a: ["1643", "1635", "1652", "1723"], correct: 0 },
+            { q: "Жәңгір ханның әскер саны қанша болды?", a: ["600", "500", "1000", "2000"], correct: 0 },
+            { q: "Жоңғар әскерінің саны шамамен қанша еді?", a: ["50 000", "40 000", "30 000", "60 000"], correct: 0 },
+            { q: "Жоңғар әскерін басқарған қонтайшы?", a: ["Батыр", "Қалдан", "Цеван Рабдан", "Амурсана"], correct: 0 },
+            { q: "Көмекке келген Жалаңтөс батырдың әскер саны?", a: ["20 000", "10 000", "5 000", "30 000"], correct: 0 },
+            { q: "Жалаңтөс батыр қай қаланың әмірі болған?", a: ["Самарқанд", "Бұхара", "Ташкент", "Хиуа"], correct: 0 },
+            { q: "Жәңгір ханның тарихи лақап аты?", a: ["Салқам", "Арыстан", "Батыр", "Қаһарман"], correct: 0 },
+            { q: "Орбұлақ шайқасында алғаш рет қолданылған қару?", a: ["Пілте мылтық", "Зеңбірек", "Арбалет", "Катапульта"], correct: 0 },
+            { q: "Шайқас өткен жер қазіргі қай облыста орналасқан?", a: ["Жетісу", "Алматы", "Шығыс Қазақстан", "Жамбыл"], correct: 0 },
+            { q: "Жәңгір ханның әкесі кім?", a: ["Есім хан", "Тәуекел хан", "Шығай хан", "Хақназар хан"], correct: 0 },
+            { q: "Орбұлақ шайқасы туралы жазған орыс тарихшысы?", a: ["И. Фишер", "А. Левшин", "Г. Миллер", "В. Вельяминов-Зернов"], correct: 0 },
+            { q: "Шайқасқа қатысқан Шапырашты руының батыры?", a: ["Қарасай", "Наурызбай", "Сұраншы", "Саурық"], correct: 0 },
+            { q: "Жалаңтөс батыр қай рудан шыққан?", a: ["Төртқара", "Адай", "Шекті", "Тама"], correct: 0 },
+            { q: "Жоңғарлардың негізгі мақсаты қандай еді?", a: ["Жетісу жерін басып алу", "Сырдария қалаларын алу", "Ташкентті бағындыру", "Сауда жолын жабу"], correct: 0 },
+            { q: "Орбұлақ шайқасы қай ғасырдың оқиғасы?", a: ["XVII ғ.", "XVI ғ.", "XVIII ғ.", "XV ғ."], correct: 0 },
+            { q: "Батыр қонтайшы жорыққа аттанғанда қай елмен соғысып жатқан еді?", a: ["Ешкіммен, тыныш еді", "Қытаймен", "Ресеймен", "Мұсылман елдерімен"], correct: 0 },
+            { q: "Шайқаста шамамен қанша жоңғар қаза тапты?", a: ["10 000", "5 000", "20 000", "2 000"], correct: 0 },
+            { q: "Жәңгір хан қай жылы қайтыс болды?", a: ["1652", "1645", "1680", "1660"], correct: 0 },
+            { q: "Жалаңтөс Баһадүр қандай атаққа ие болған?", a: ["Самарқанд әмірі", "Тұран жолбарысы", "Дала көсемі", "Ұлы қаған"], correct: 0 },
+            { q: "Шайқасқа қатысқан Арғын руының батыры?", a: ["Ағынтай", "Бөгенбай", "Малайсары", "Олжабай"], correct: 0 },
+            { q: "Найман руынан қатысқан батыр?", a: ["Көксерек", "Қабанбай", "Еспембет", "Матай"], correct: 0 },
+            { q: "Қаңлы руынан қатысқан батыр?", a: ["Сарбұқа", "Желкілдек", "Айдар", "Төле"], correct: 0 },
+            { q: "Жәңгір хан тактиканы қайдан үйренуі мүмкін деген болжам бар?", a: ["Еуропа/Орыс тәжірибесі", "Қытай", "Моңғол", "Парсы"], correct: 0 },
+            { q: "Батыр қонтайшының толық есімі?", a: ["Эрдэни Батыр", "Галдан Бошогту", "Цеван Доржи", "Лаузан"], correct: 0 },
+            { q: "Шайқас болған маусым?", a: ["Жаз", "Күз", "Көктем", "Қыс"], correct: 0 },
+            { q: "Орбұлақ шайқасы кезіндегі Ресей патшасы?", a: ["Михаил Федорович", "Петр I", "Иван Грозный", "Алексей Михайлович"], correct: 0 },
+            { q: "Жәңгір хан қай жерде жерленген?", a: ["Түркістан", "Сарайшық", "Ұлытау", "Тараз"], correct: 0 },
+            { q: "Жоңғар мемлекетінің астанасы?", a: ["Құба қаласы (болмаған)", "Тарбағатай", "Үрімші", "Жоңғария (көшпелі орда)"], correct: 3 },
+            { q: "Жәңгір ханның 600 сарбазының жартысы немен қаруланды?", a: ["Мылтықпен", "Найзамен", "Айбалтамен", "Шоқпармен"], correct: 0 },
+            { q: "Жалаңтөс батырдың келуі шайқастың нешінші күні болды?", a: ["Шайқас қызып тұрғанда", "Екінші күні", "Бірінші күні таңда", "Үшінші күні"], correct: 0 },
+            { q: "Орбұлақ жеңісіне арналған ескерткіш стелла қай жылы қойылды?", a: ["2017 (жаңартылған)", "1993", "2000", "1986"], correct: 0 },
+            { q: "Жоңғарлар қандай дінді ұстанған?", a: ["Буддизм (Ламаизм)", "Ислам", "Христиан", "Тәңіршілдік"], correct: 0 },
+            { q: "Жәңгір ханның мұрагері кім?", a: ["Тәуке хан", "Есім хан", "Болат хан", "Әбілқайыр"], correct: 0 },
+            { q: "Жалаңтөс батыр салдырған медресе?", a: ["Тіллә-Қари", "Көкілташ", "Ұлықбек", "Мир-Араб"], correct: 0 },
+            { q: "Орбұлақ шайқасы Қазақ-Жоңғар соғыстарының қай кезеңі?", a: ["Бастапқы кезеңі", "Аяқталуы", "Ортасы", "Ақтабан шұбырынды"], correct: 0 },
+            { q: "Қазақ жасақтары тау ішінде не қазды?", a: ["Ор (траншея)", "Құдық", "Жертөле", "Туннель"], correct: 0 },
+            { q: "Жоңғарлар шайқастан кейін қайда шегінді?", a: ["Өз жеріне", "Қытайға", "Орта Азияға", "Сібірге"], correct: 0 },
+            { q: "Бұл шайқасқа Қырғыз халқы қатысты ма?", a: ["Иә, көмектесті", "Жоқ", "Қарсы соғысты", "Дерек жоқ"], correct: 0 },
+            { q: "Жәңгір хан тұтқынға түскен бе?", a: ["Иә, бұрын түскен", "Жоқ, ешқашан", "Шайқаста түсті", "Өлген соң түсті"], correct: 0 },
+            { q: "Орбұлақ шайқасының басты нәтижесі?", a: ["Жоңғарлардың беті қайтты", "Жоңғарлар жойылды", "Қазақтар жеңілді", "Бейбіт келісім жасалды"], correct: 0 }
+        ];
+
+        const conceptualQuestions = [
+            { q: "600 сарбаздың 50 мың әскерге төтеп беруінің БАСТЫ себебі?", a: ["Жер бедері мен тактика", "Жоңғарлардың әлсіздігі", "Ауа райының қолайсыздығы", "Рухани күш"], correct: 0 },
+            { q: "Жәңгір ханның «Ор» (окоп) қазу әдісі қандай артықшылық берді?", a: ["Жау оғынан қорғану және дәл көздеу", "Жасырынып қашу", "Су жинау", "Аттарды ұстау"], correct: 0 },
+            { q: "Бұл шайқастағы мылтықтың рөлі қандай болды?", a: ["Психологиялық соққы және алыстан жою", "Тек дыбыс шығару", "Рөлі төмен болды", "Түтін жасау"], correct: 0 },
+            { q: "Жалаңтөс батырдың келуі неге шешуші болды?", a: ["Жаудың ту сыртынан соққы берді", "Келіссөз жүргізді", "Жоңғарларды қорқытты", "Қару әкелді"], correct: 0 },
+            { q: "Тау шатқалын таңдаудың стратегиялық мәні?", a: ["Жаудың сандық артықшылығын жою", "Күннен қорғану", "Желден таса болу", "Суға жақын болу"], correct: 0 },
+            { q: "Орбұлақ шайқасын тарихтағы қай шайқаспен жиі салыстырады?", a: ["300 спарталық (Фермопиль)", "Ватерлоо", "Канны", "Сталинград"], correct: 0 },
+            { q: "Жәңгір хан қолданған тактика кейін қандай соғыс түріне негіз болды?", a: ["Позициялық соғыс", "Партизандық соғыс", "Теңіз соғысы", "Ядролық соғыс"], correct: 0 },
+            { q: "Егер Жалаңтөс батыр келмегенде не болуы мүмкін еді?", a: ["Қазақ жасағы қоршауда қалып, қырылуы мүмкін еді", "Бәрібір жеңер еді", "Жоңғарлар кетер еді", "Белгісіз"], correct: 0 },
+            { q: "Бұл жеңіс қазақ халқына қандай рухани әсер етті?", a: ["Бірлік пен сенімді күшейтті", "Арқаны кеңге салды", "Қорқыныш тудырды", "Жауластырды"], correct: 0 },
+            { q: "Неге жоңғарлар атты әскерімен тау ішінде тиімсіз болды?", a: ["Тар жерде маневр жасай алмады", "Аттары ауырды", "Жаяу соғысты қалады", "Тастан қорықты"], correct: 0 },
+            { q: "Жәңгір ханның барлау жүйесі қалай жұмыс істеді?", a: ["Жаудың келе жатқанын алдын ала білді", "Кездейсоқ кездесті", "Сәтсіз болды", "Сатқындар айтты"], correct: 0 },
+            { q: "Отты қарудың (мылтық) сол замандағы артықшылығы?", a: ["Сауытты тесу мүмкіндігі", "Тез оқталуы", "Дыбыссыздығы", "Арзандығы"], correct: 0 },
+            { q: "Батыр қонтайшының негізгі қателігі?", a: ["Қарсыласын бағаламау және жерді зерттемеу", "Әскерінің аздығы", "Кешігіп шығуы", "Одақтасының болмауы"], correct: 0 },
+            { q: "Орбұлақ шайқасы геосаяси тұрғыдан нені көрсетті?", a: ["Орта Азия халықтарының ынтымақтастығын", "Ресейдің ықпалын", "Қытайдың күшін", "Еуропаның көмегін"], correct: 0 },
+            { q: "Таулы жердегі «бөгеу» (засада) тактикасының мақсаты?", a: ["Күшті жауды тоқтатып, уақыт ұту", "Қашып кету", "Демалу", "Келіссөз күту"], correct: 0 },
+            { q: "600 жауынгердің «батыр» атануының себебі?", a: ["Өлімге бас тігіп, ерлік көрсеткені үшін", "Хан бұйрығымен", "Жай сөз", "Аттары солай болған"], correct: 0 },
+            { q: "Шайқас кезіндегі «Ту сыртынан соққының» әсері?", a: ["Жауды дүрліктіріп, қоршауда қалдық деп ойлатты", "Көмектеспеді", "Жау қуанды", "Белгісіз"], correct: 0 },
+            { q: "Орбұлақ тактикасы бүгінгі күні өзекті ме?", a: ["Иә, әскери өнерде маңызы бар", "Жоқ, ескірді", "Тек тарихта қалды", "Мүлдем жоқ"], correct: 0 },
+            { q: "Жеңістен кейін Жәңгір ханның беделі қалай өзгерді?", a: ["Бүкіл қазақ даласы мен Орта Азияға тарады", "Төмендеді", "Өзгермеді", "Ұмытылды"], correct: 0 },
+            { q: "Бұл шайқас неліктен «Дала Фермопилі» деп аталады?", a: ["Аз күшпен үлкен армияға қарсы тұрғаны үшін", "Грекияда болғаны үшін", "Спарталықтар қатысқаны үшін", "Қателесіп айтылған"], correct: 0 }
+        ];
+
+        let currentQuestions = [];
+        let currentQuestionIndex = 0;
+        let score = 0;
+        let startTime;
+        let timerInterval;
+        let elapsedMilliseconds = 0;
+        let mistakes = []; 
+        let userJustPlayed = false;
+
+        const startScreen = document.getElementById('start-screen');
+        const quizScreen = document.getElementById('quiz-screen');
+        const resultScreen = document.getElementById('result-screen');
+        const reviewScreen = document.getElementById('review-screen');
+        const leaderboardScreen = document.getElementById('leaderboard-screen');
+        const quizContent = document.getElementById('quiz-content');
+        const questionEl = document.getElementById('question');
+        const answersEl = document.getElementById('answers');
+        const progressEl = document.getElementById('progressText');
+        const timerEl = document.getElementById('timerText');
+        const modal = document.getElementById('modal-overlay');
+
+        document.getElementById('startBtn').addEventListener('click', startGame);
+        document.getElementById('lbBtn').addEventListener('click', () => showLeaderboard(false));
+        document.getElementById('resultLbBtn').addEventListener('click', () => showLeaderboard(true));
+        document.getElementById('saveScoreBtn').addEventListener('click', saveHighScore);
+        document.getElementById('reviewBtn').addEventListener('click', showReview);
+
+        function shuffleArray(array) {
+            for (let i = array.length - 1; i > 0; i--) {
+                const j = Math.floor(Math.random() * (i + 1));
+                [array[i], array[j]] = [array[j], array[i]];
+            }
+            return array;
+        }
+
+        function startGame() {
+            score = 0;
+            currentQuestionIndex = 0;
+            elapsedMilliseconds = 0;
+            mistakes = [];
+            userJustPlayed = false;
+            
+            let fQ = shuffleArray([...factualQuestions]).slice(0, 13);
+            let cQ = shuffleArray([...conceptualQuestions]).slice(0, 7);
+            currentQuestions = shuffleArray([...fQ, ...cQ]);
+
+            startScreen.classList.remove('active');
+            resultScreen.classList.remove('active');
+            reviewScreen.classList.remove('active');
+            leaderboardScreen.classList.remove('active');
+            quizScreen.classList.add('active');
+
+            startTime = Date.now();
+            timerInterval = setInterval(updateTimer, 100);
+            showQuestion();
+        }
+
+        function updateTimer() {
+            let now = Date.now();
+            let diff = now - startTime;
+            elapsedMilliseconds = diff;
+            let totalSeconds = Math.floor(diff / 1000);
+            let minutes = Math.floor(totalSeconds / 60);
+            let seconds = totalSeconds % 60;
+            timerEl.innerText = (minutes < 10 ? "0" + minutes : minutes) + ":" + (seconds < 10 ? "0" + seconds : seconds);
+        }
+
+        function showQuestion() {
+            quizContent.classList.remove('hidden');
+
+            let qData = currentQuestions[currentQuestionIndex];
+            progressEl.innerText = `Сұрақ: ${currentQuestionIndex + 1}/${currentQuestions.length}`;
+            questionEl.innerText = qData.q;
+            answersEl.innerHTML = '';
+
+            let options = qData.a.map((text, index) => {
+                return { text: text, originalIndex: index };
+            });
+            shuffleArray(options);
+
+            options.forEach(opt => {
+                const btn = document.createElement('button');
+                btn.className = 'answer-btn';
+                btn.innerText = opt.text;
+                btn.addEventListener('click', () => checkAnswer(opt.originalIndex === qData.correct, btn, qData));
+                answersEl.appendChild(btn);
+            });
+        }
+
+        function checkAnswer(isCorrect, btnElement, qData) {
+            const allBtns = answersEl.querySelectorAll('.answer-btn');
+            allBtns.forEach(b => b.replaceWith(b.cloneNode(true))); 
+
+            if (isCorrect) {
+                btnElement.classList.add('correct');
+                score++;
+            } else {
+                btnElement.classList.add('wrong');
+                mistakes.push({
+                    q: qData.q,
+                    wrong: btnElement.innerText,
+                    right: qData.a[qData.correct]
+                });
+            }
+
+            setTimeout(() => {
+                quizContent.classList.add('hidden'); 
+                setTimeout(() => {
+                    currentQuestionIndex++;
+                    if (currentQuestionIndex < currentQuestions.length) {
+                        showQuestion();
+                    } else {
+                        endGame();
+                    }
+                }, 300);
+            }, 800);
+        }
+
+        function endGame() {
+            clearInterval(timerInterval);
+            userJustPlayed = true;
+            quizScreen.classList.remove('active');
+            resultScreen.classList.add('active');
+
+            document.getElementById('score-text').innerText = `${score} / ${currentQuestions.length}`;
+            document.getElementById('time-text').innerText = `Уақыт: ${timerEl.innerText}`;
+
+            const reviewBtn = document.getElementById('reviewBtn');
+            reviewBtn.style.display = mistakes.length > 0 ? 'inline-block' : 'none';
+
+            if (score === currentQuestions.length) { 
+                checkLeaderboardEligibility();
+                document.getElementById('fail-message').style.display = 'none';
+                document.getElementById('result-title').innerText = "КЕРЕМЕТ ЖЕҢІС!";
+                document.getElementById('result-title').style.color = "#f1c40f";
+            } else {
+                document.getElementById('fail-message').style.display = 'block';
+                document.getElementById('result-title').innerText = "ОЙЫН АЯҚТАЛДЫ";
+                document.getElementById('result-title').style.color = "white";
+            }
+        }
+
+        function showReview() {
+            resultScreen.classList.remove('active');
+            reviewScreen.classList.add('active');
+            const box = document.getElementById('review-box');
+            box.innerHTML = '';
+
+            mistakes.forEach((m, index) => {
+                box.innerHTML += `
+                    <div class="mistake-item">
+                        <div class="mistake-q">${index + 1}. ${m.q}</div>
+                        <div class="mistake-wrong">Сіз: ${m.wrong}</div>
+                        <div class="mistake-right">Дұрыс: ${m.right}</div>
+                    </div>
+                `;
+            });
+        }
+
+        async function getLeaderboardData() {
+            const q = query(collection(db, LEADERBOARD_COLLECTION), orderBy("time"), limit(10));
+            const querySnapshot = await getDocs(q);
+            let data = [];
+            querySnapshot.forEach((doc) => {
+                data.push(doc.data());
+            });
+            return data;
+        }
+
+        function renderSkeletonTable(tbody) {
+             tbody.innerHTML = `<tr><th>#</th><th>Есім</th><th>Уақыт</th></tr>`;
+             for(let i=0; i<10; i++) {
+                 tbody.innerHTML += `
+                    <tr>
+                        <td style="opacity:0.3">${i + 1}</td>
+                        <td style="opacity:0.3">Жүктелуде...</td>
+                        <td style="opacity:0.3">--:--</td>
+                    </tr>
+                 `;
+             }
+        }
+
+        async function showLeaderboard(fromResult = false) {
+            startScreen.classList.remove('active');
+            resultScreen.classList.remove('active');
+            leaderboardScreen.classList.add('active');
+            
+            const tbody = document.getElementById('leaderboard-table');
+            const myResultRow = document.getElementById('my-result-row');
+            
+            renderSkeletonTable(tbody); 
+            myResultRow.style.display = 'none';
+
+            try {
+                const data = await getLeaderboardData();
+                tbody.innerHTML = `<tr><th>#</th><th>Есім</th><th>Уақыт</th></tr>`;
+                
+                for (let i = 0; i < 10; i++) {
+                    if (i < data.length) {
+                        let entry = data[i];
+                        let rankClass = '';
+                        let icon = '';
+
+                        if (i === 0) { rankClass = 'rank-1'; icon = '🥇'; }
+                        else if (i === 1) { rankClass = 'rank-2'; icon = '🥈'; }
+                        else if (i === 2) { rankClass = 'rank-3'; icon = '🥉'; }
+
+                        let totalSec = Math.floor(entry.time / 1000);
+                        let m = Math.floor(totalSec / 60);
+                        let s = totalSec % 60;
+                        let timeStr = `${m}:${s < 10 ? '0'+s : s}`;
+
+                        tbody.innerHTML += `
+                            <tr class="${rankClass}">
+                                <td>${icon} ${i + 1}</td>
+                                <td>${entry.name}</td>
+                                <td>${timeStr}</td>
+                            </tr>
+                        `;
+                    } else {
+                        tbody.innerHTML += `
+                            <tr>
+                                <td style="opacity:0.3">${i + 1}</td>
+                                <td style="opacity:0.3">---</td>
+                                <td style="opacity:0.3">--:--</td>
+                            </tr>
+                        `;
+                    }
+                }
+
+                if (fromResult && userJustPlayed) {
+                     let isInside = false;
+                     if (score === currentQuestions.length) {
+                        if (data.length < 10) isInside = true;
+                        else if (elapsedMilliseconds < data[data.length-1].time) isInside = true;
+                     }
+
+                     if (!isInside) {
+                        let totalSec = Math.floor(elapsedMilliseconds / 1000);
+                        let m = Math.floor(totalSec / 60);
+                        let s = totalSec % 60;
+                        document.getElementById('my-time-display').innerText = `${m}:${s < 10 ? '0'+s : s}`;
+                        myResultRow.style.display = 'flex';
+                     }
+                }
+
+            } catch (error) {
+                console.error("Error:", error);
+                tbody.innerHTML = '<tr><td colspan="3">Интернет жоқ сияқты...</td></tr>';
+            }
+        }
+
+        async function checkLeaderboardEligibility() {
+            try {
+                const data = await getLeaderboardData();
+                if (data.length < 10 || elapsedMilliseconds < data[data.length - 1].time) {
+                    modal.style.display = 'flex';
+                }
+            } catch (e) {
+                modal.style.display = 'flex';
+            }
+        }
+
+        async function saveHighScore() {
+            const nameInput = document.getElementById('username');
+            const name = nameInput.value.trim() || "Белгісіз";
+            const btn = document.getElementById('saveScoreBtn');
+            
+            btn.innerText = "Сақталуда...";
+            btn.disabled = true;
+
+            try {
+                await addDoc(collection(db, LEADERBOARD_COLLECTION), {
+                    name: name,
+                    time: elapsedMilliseconds,
+                    date: new Date().toISOString()
+                });
+                modal.style.display = 'none';
+                showLeaderboard(true);
+            } catch (e) {
+                alert("Қате! Дерек сақталмады.");
+            } finally {
+                btn.innerText = "САҚТАУ";
+                btn.disabled = false;
+            }
+        }
+    </script>
+</body>
+</html>

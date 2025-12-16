@@ -1,0 +1,467 @@
+<!DOCTYPE html>
+<html lang="kk">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Халық Дауысы</title>
+    <link href="https://fonts.googleapis.com/css2?family=Montserrat:wght@400;600;800&display=swap" rel="stylesheet">
+    <style>
+        :root {
+            --primary-blue: #0984e3;
+            --dark-blue: #0a3d62;
+            --light-blue: #74b9ff;
+            --accent-yellow: #f1c40f;
+            --bar-bg: rgba(255, 255, 255, 0.1);
+            --wiki-red: #e74c3c; /* Википедия қызыл түсі */
+        }
+
+        body {
+            margin: 0;
+            padding: 0;
+            font-family: 'Montserrat', sans-serif;
+            background: #000428; 
+            background: linear-gradient(to right, #34495e, #000428);
+            color: white;
+            height: 100vh;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            overflow: hidden;
+            user-select: none;
+        }
+
+        .screen {
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            justify-content: center;
+            width: 90%;
+            max-width: 800px;
+            text-align: center;
+        }
+
+        h1 {
+            font-size: 2.5rem;
+            color: var(--accent-yellow);
+            text-transform: uppercase;
+            margin-bottom: 20px;
+            text-shadow: 0 0 20px rgba(241, 196, 15, 0.6);
+            animation: titleGlow 2s ease-in-out infinite alternate;
+        }
+
+        /* --- ВИКИПЕДИЯ СТИЛІНДЕГІ КРЕСТИК --- */
+        .back-btn {
+            position: absolute;
+            top: 20px;
+            right: 30px;
+            font-size: 45px;
+            font-weight: 300;
+            color: rgba(255, 255, 255, 0.6);
+            text-decoration: none;
+            line-height: 1;
+            transition: all 0.4s cubic-bezier(0.175, 0.885, 0.32, 1.275);
+            z-index: 100;
+            cursor: pointer;
+            background: none;
+            border: none;
+            padding: 0;
+        }
+
+        .back-btn:hover {
+            color: var(--wiki-red);
+            transform: rotate(90deg) scale(1.1);
+            text-shadow: 0 0 15px rgba(231, 76, 60, 0.6);
+        }
+
+        /* --- КАРТОЧКА --- */
+        .question-card {
+            background: rgba(10, 61, 98, 0.95);
+            border: 2px solid var(--light-blue);
+            border-radius: 20px;
+            padding: 30px;
+            width: 100%;
+            box-shadow: 0 15px 40px rgba(0,0,0,0.6);
+            position: relative;
+            animation: slideUpFade 0.7s cubic-bezier(0.25, 0.46, 0.45, 0.94) both;
+            max-height: 80vh;
+            overflow-y: auto; 
+        }
+        
+        .question-card::-webkit-scrollbar { width: 8px; }
+        .question-card::-webkit-scrollbar-track { background: transparent; }
+        .question-card::-webkit-scrollbar-thumb { background: var(--light-blue); border-radius: 4px; }
+
+        .card-enter { animation: slideUpFade 0.7s cubic-bezier(0.25, 0.46, 0.45, 0.94) both; }
+
+        .debate-text {
+            font-size: 1.4rem;
+            margin-bottom: 30px;
+            line-height: 1.4;
+            transition: opacity 0.3s;
+        }
+
+        /* --- BUTTONS --- */
+        .options-container {
+            display: flex;
+            gap: 20px;
+            justify-content: center;
+            transition: all 0.5s ease;
+        }
+
+        .vote-btn {
+            flex: 1;
+            padding: 20px;
+            font-size: 1.1rem;
+            border: none;
+            border-radius: 15px;
+            cursor: pointer;
+            font-weight: bold;
+            color: white;
+            box-shadow: 0 5px 15px rgba(0,0,0,0.3);
+            transition: all 0.3s;
+        }
+
+        .btn-left { background: linear-gradient(135deg, #2980b9, #3498db); border: 2px solid #3498db; }
+        .btn-right { background: linear-gradient(135deg, #c0392b, #e74c3c); border: 2px solid #e74c3c; }
+        
+        .final-btn {
+            background: transparent;
+            border: 2px solid var(--accent-yellow);
+            color: var(--accent-yellow);
+            margin-top: 10px;
+        }
+        .final-btn:hover {
+            background: var(--accent-yellow); color: black;
+            box-shadow: 0 0 20px rgba(241, 196, 15, 0.5);
+        }
+
+        .vote-btn:hover { transform: translateY(-3px) scale(1.02); filter: brightness(1.1); }
+        .vote-btn:active { transform: scale(0.95); }
+
+        /* --- RESULTS --- */
+        .results-container {
+            display: none;
+            flex-direction: column;
+            gap: 15px;
+            margin-top: 10px;
+            width: 100%;
+            opacity: 0;
+            transition: opacity 0.5s ease 0.2s;
+        }
+        .results-container.show { opacity: 1; }
+
+        .result-bar-wrapper {
+            position: relative;
+            background: var(--bar-bg);
+            height: 45px;
+            border-radius: 10px;
+            overflow: hidden;
+            display: flex;
+            align-items: center;
+            padding: 0 15px;
+            box-shadow: inset 0 2px 5px rgba(0,0,0,0.2);
+            margin-bottom: 5px;
+        }
+
+        .fill-bar {
+            position: absolute; top: 0; left: 0; height: 100%; width: 0%;
+            transition: width 1.5s cubic-bezier(0.22, 1, 0.36, 1); 
+            z-index: 1;
+        }
+        .fill-bar::after {
+            content: ''; position: absolute; top: 0; left: -100%; width: 50%; height: 100%;
+            background: linear-gradient(90deg, transparent, rgba(255,255,255,0.3), transparent);
+            animation: shimmer 2s infinite;
+        }
+        .fill-left { background: linear-gradient(90deg, #2980b9, #3498db); }
+        .fill-right { background: linear-gradient(90deg, #c0392b, #e74c3c); }
+
+        .result-text {
+            position: relative; z-index: 2; display: flex;
+            justify-content: space-between; width: 100%;
+            font-weight: bold; font-size: 1rem; text-shadow: 1px 1px 2px black;
+        }
+
+        .next-btn {
+            margin-top: 20px; padding: 10px 30px;
+            background: rgba(255,255,255,0.1); border: 2px solid white;
+            color: white; border-radius: 30px; cursor: pointer;
+            display: none; animation: fadeInBtn 0.5s ease 1s both;
+        }
+        .next-btn:hover { background: white; color: black; }
+
+        .stats-list {
+            display: flex; flex-direction: column; gap: 20px;
+            text-align: left; width: 100%;
+        }
+        .stat-item {
+            background: rgba(0,0,0,0.2);
+            padding: 15px; border-radius: 10px;
+            border-left: 4px solid var(--accent-yellow);
+        }
+        .stat-question { font-size: 0.9rem; color: #dfe6e9; margin-bottom: 8px; }
+        .mini-bar { height: 30px; font-size: 0.8rem; }
+
+        @keyframes slideUpFade { from { opacity: 0; transform: translateY(50px); } to { opacity: 1; transform: translateY(0); } }
+        @keyframes titleGlow { from { text-shadow: 0 0 15px rgba(241, 196, 15, 0.5); } to { text-shadow: 0 0 30px rgba(241, 196, 15, 1); } }
+        @keyframes shimmer { to { left: 150%; } }
+        @keyframes fadeInBtn { from { opacity: 0; } to { opacity: 1; } }
+        .hidden-fade { opacity: 0; transform: scale(0.95); }
+
+    </style>
+</head>
+<body>
+
+    <button onclick="goBack()" class="back-btn">&times;</button>
+
+    <div class="screen">
+        <h1>ХАЛЫҚ ДАУЫСЫ 🗣️</h1>
+        
+        <div class="question-card" id="mainCard">
+            <div id="gameContent">
+                <p id="qText" class="debate-text">Сұрақ жүктелуде...</p>
+
+                <div id="voteButtons" class="options-container">
+                    <button class="vote-btn btn-left" onclick="submitVote(0)">Нұсқа 1</button>
+                    <button class="vote-btn btn-right" onclick="submitVote(1)">Нұсқа 2</button>
+                </div>
+
+                <div id="endGameButtons" class="options-container" style="display: none; flex-direction: column;">
+                    <button class="vote-btn final-btn" onclick="goBack()">МӘЗІРГЕ ОРАЛУ 🏠</button>
+                    <button class="vote-btn final-btn" onclick="showAllStats()">БАРЛЫҚ СТАТИСТИКА 📊</button>
+                </div>
+
+                <div id="resultsArea" class="results-container">
+                    <div class="result-bar-wrapper">
+                        <div id="bar1" class="fill-bar fill-left"></div>
+                        <div class="result-text"><span id="label1"></span><span id="perc1">0%</span></div>
+                    </div>
+                    <div class="result-bar-wrapper">
+                        <div id="bar2" class="fill-bar fill-right"></div>
+                        <div class="result-text"><span id="label2"></span><span id="perc2">0%</span></div>
+                    </div>
+                    <div style="margin-top:10px; font-size: 0.8rem; color: #bdc3c7;">Дауыс саны: <span id="totalVotes">0</span></div>
+                    <button class="next-btn" onclick="nextQuestion()">КЕЛЕСІ СҰРАҚ →</button>
+                </div>
+            </div>
+
+            <div id="fullStatsContent" style="display: none;">
+                <h3 style="color:var(--light-blue); margin-top:0;">БАРЛЫҚ ДАУЫСТАР:</h3>
+                <div id="statsList" class="stats-list">
+                    <p>Жүктелуде...</p>
+                </div>
+                <button class="vote-btn final-btn" style="margin-top:20px;" onclick="goBack()">МӘЗІРГЕ ҚАЙТУ</button>
+            </div>
+        </div>
+    </div>
+
+    <script type="module">
+        import { initializeApp } from "https://www.gstatic.com/firebasejs/10.7.1/firebase-app.js";
+        import { getFirestore, doc, getDoc, setDoc, getDocs, collection, increment } from "https://www.gstatic.com/firebasejs/10.7.1/firebase-firestore.js";
+
+        // ↓↓↓ FIREBASE CONFIG ↓↓↓
+        const firebaseConfig = {
+            apiKey: "AIzaSyBnKoa0XwFEWVgtHSZBOHmJliK-0Rx1Ums", 
+            authDomain: "quiz-be514.firebaseapp.com",
+            projectId: "quiz-be514",
+            storageBucket: "quiz-be514.firebasestorage.app",
+            messagingSenderId: "497330012390",
+            appId: "1:497330012390:web:ca18b9b6192158a4f4bb27",
+            measurementId: "G-RBRVNN8V7X"
+        };
+        // ↑↑↑ CONFIG ↑↑↑
+
+        const app = initializeApp(firebaseConfig);
+        const db = getFirestore(app);
+        const VOTES_COLLECTION = "debate_votes"; 
+
+        const questions = [
+            { id: "q1", text: "Егер Орбұлақта 600 емес, 5000 әскер болғанда, тактика өзгерер ме еді?", opt1: "Иә, ашық соғысар еді", opt2: "Жоқ, бәрібір окоп қазар еді" },
+            { id: "q2", text: "Жалаңтөс батырдың келуі: алдын-ала жоспар ма әлде кездейсоқтық па?", opt1: "Нақты жоспарланған", opt2: "Кездейсоқ үлгерді" },
+            { id: "q3", text: "Орбұлақ шайқасының маңызы «Аңырақай» шайқасынан жоғары ма?", opt1: "Иә, рух берді", opt2: "Жоқ, Аңырақай маңыздырақ" },
+            { id: "q4", text: "Мылтық (отты қару) жеңіске қаншалықты әсер етті?", opt1: "Шешуші рөл атқарды", opt2: "Рух пен тактика маңыздырақ" }
+        ];
+
+        let currentIdx = 0;
+
+        const mainCard = document.getElementById('mainCard');
+        const gameContent = document.getElementById('gameContent');
+        const fullStatsContent = document.getElementById('fullStatsContent');
+        const qText = document.getElementById('qText');
+        const voteArea = document.getElementById('voteButtons');
+        const endGameButtons = document.getElementById('endGameButtons');
+        const resultsArea = document.getElementById('resultsArea');
+        const btn1 = document.querySelector('.btn-left');
+        const btn2 = document.querySelector('.btn-right');
+        const label1 = document.getElementById('label1');
+        const label2 = document.getElementById('label2');
+        const bar1 = document.getElementById('bar1');
+        const bar2 = document.getElementById('bar2');
+        const perc1 = document.getElementById('perc1');
+        const perc2 = document.getElementById('perc2');
+        const totalText = document.getElementById('totalVotes');
+        const nextBtn = document.querySelector('.next-btn');
+
+        // --- БАСТЫ МӘЗІРГЕ ҚАЙТУ ФУНКЦИЯСЫ ---
+        window.goBack = function() {
+            // "Интроны өткізіп жібер" деген белгі қалдырамыз
+            sessionStorage.setItem('skipIntro', 'true');
+            // Индекске өтеміз
+            window.location.href = 'index.html';
+        };
+
+        window.onload = loadQuestion;
+        window.nextQuestion = nextQuestion;
+        window.submitVote = submitVote;
+        window.showAllStats = showAllStats;
+
+        function animateValue(obj, start, end, duration) {
+            let startTimestamp = null;
+            const step = (timestamp) => {
+                if (!startTimestamp) startTimestamp = timestamp;
+                const progress = Math.min((timestamp - startTimestamp) / duration, 1);
+                let currentVal = Math.floor(progress * (end - start) + start);
+                obj.innerText = currentVal + "%";
+                if (progress < 1) window.requestAnimationFrame(step);
+            };
+            window.requestAnimationFrame(step);
+        }
+
+        function loadQuestion() {
+            mainCard.classList.remove('card-enter');
+            void mainCard.offsetWidth;
+            mainCard.classList.add('card-enter');
+
+            if (currentIdx >= questions.length) {
+                qText.innerText = "Барлық сұрақтар аяқталды! \nСіздің пікіріңіз маңызды.";
+                voteArea.style.display = 'none';
+                resultsArea.style.display = 'none';
+                endGameButtons.style.display = 'flex';
+                return;
+            }
+
+            const q = questions[currentIdx];
+            qText.innerText = q.text;
+            qText.style.opacity = '1';
+            btn1.innerText = q.opt1;
+            btn2.innerText = q.opt2;
+            label1.innerText = q.opt1;
+            label2.innerText = q.opt2;
+
+            voteArea.style.display = 'flex';
+            voteArea.classList.remove('hidden-fade');
+            endGameButtons.style.display = 'none';
+            resultsArea.style.display = 'none';
+            resultsArea.classList.remove('show');
+            bar1.style.width = '0%';
+            bar2.style.width = '0%';
+            perc1.innerText = '0%';
+            perc2.innerText = '0%';
+        }
+
+        async function submitVote(choiceIndex) {
+            const q = questions[currentIdx];
+            const docRef = doc(db, VOTES_COLLECTION, q.id);
+
+            voteArea.classList.add('hidden-fade');
+            qText.style.opacity = '0.5';
+            qText.innerText = "Дауыстар саналуда...";
+
+            try {
+                const fieldName = choiceIndex === 0 ? "opt1_count" : "opt2_count";
+                await setDoc(docRef, { 
+                    [fieldName]: increment(1),
+                    text: q.text 
+                }, { merge: true });
+
+                const snap = await getDoc(docRef);
+                const data = snap.exists() ? snap.data() : { opt1_count: 0, opt2_count: 0 };
+                const c1 = data.opt1_count || 0;
+                const c2 = data.opt2_count || 0;
+                const total = c1 + c2;
+                let p1 = total === 0 ? 0 : Math.round((c1 / total) * 100);
+                let p2 = total === 0 ? 0 : Math.round((c2 / total) * 100);
+
+                voteArea.style.display = 'none';
+                resultsArea.style.display = 'flex';
+                qText.innerText = questions[currentIdx].text;
+                qText.style.opacity = '1';
+                
+                setTimeout(() => {
+                    resultsArea.classList.add('show');
+                    bar1.style.width = p1 + "%";
+                    bar2.style.width = p2 + "%";
+                    animateValue(perc1, 0, p1, 1500);
+                    animateValue(perc2, 0, p2, 1500);
+                }, 100);
+
+                totalText.innerText = total;
+                nextBtn.style.display = 'inline-block';
+
+            } catch (e) {
+                console.error(e);
+                qText.innerText = "Қате: Интернетті тексеріңіз.";
+            }
+        }
+
+        function nextQuestion() {
+            currentIdx++;
+            nextBtn.style.display = 'none';
+            loadQuestion();
+        }
+
+        async function showAllStats() {
+            gameContent.style.display = 'none';
+            fullStatsContent.style.display = 'block';
+            
+            const list = document.getElementById('statsList');
+            list.innerHTML = "Ақпарат жүктелуде...";
+
+            try {
+                const querySnapshot = await getDocs(collection(db, VOTES_COLLECTION));
+                const dbData = {};
+                querySnapshot.forEach((doc) => {
+                    dbData[doc.id] = doc.data();
+                });
+
+                list.innerHTML = ""; 
+
+                questions.forEach((q, index) => {
+                    const data = dbData[q.id] || { opt1_count: 0, opt2_count: 0 };
+                    const c1 = data.opt1_count || 0;
+                    const c2 = data.opt2_count || 0;
+                    const total = c1 + c2;
+                    let p1 = total === 0 ? 0 : Math.round((c1 / total) * 100);
+                    let p2 = total === 0 ? 0 : Math.round((c2 / total) * 100);
+
+                    const item = document.createElement('div');
+                    item.className = 'stat-item';
+                    item.innerHTML = `
+                        <div class="stat-question"><b>${index + 1}.</b> ${q.text}</div>
+                        
+                        <div class="result-bar-wrapper mini-bar" style="margin-bottom:5px;">
+                            <div class="fill-bar fill-left" style="width:${p1}%"></div>
+                            <div class="result-text" style="font-size:0.8rem;">
+                                <span>${q.opt1}</span> <span>${p1}%</span>
+                            </div>
+                        </div>
+
+                        <div class="result-bar-wrapper mini-bar">
+                            <div class="fill-bar fill-right" style="width:${p2}%"></div>
+                            <div class="result-text" style="font-size:0.8rem;">
+                                <span>${q.opt2}</span> <span>${p2}%</span>
+                            </div>
+                        </div>
+                    `;
+                    list.appendChild(item);
+                });
+
+            } catch (error) {
+                console.error(error);
+                list.innerHTML = "Қате шықты. Интернетті тексеріңіз.";
+            }
+        }
+    </script>
+
+</body>
+</html>

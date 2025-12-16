@@ -1,0 +1,207 @@
+<!DOCTYPE html>
+<html lang="kk">
+
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>ORBULAQ SAGA</title>
+  
+  <link href="https://fonts.googleapis.com/css2?family=Indie+Flower&display=swap" rel="stylesheet">
+  <link href="https://fonts.googleapis.com/css2?family=Cherry+Swash&display=swap" rel="stylesheet">
+  
+  <link rel="stylesheet" href="style.css">
+</head>
+
+<body>
+
+  <div id="menuScreen" class="screen">
+    <div id="menuContent">
+      <div id="welcomeText">ORBULAQ SAGA</div>
+      <button id="startBtn">ОЙЫНДЫ БАСТАУ</button>
+      
+      <div id="bottomImages">
+        <img src="c3wex3efrevfd.png" alt="">
+        <img src="Без названия.png" alt="">
+      </div>
+    </div>
+
+    <audio id="bgMusic" src="Ramin_Djawadi_-Dracarys_OST_Igra_prestolov_Pesn_lda_i_plameni(SkySound.cc).mp3"></audio>
+    
+    <div id="animatedNewImage">
+      <img src="photo_2025-11-30_13-50-11-removebg-preview.png" alt="">
+    </div>
+  </div>
+
+  <div id="selectionScreen" style="display: none;"> <img src="copy_9ED7D146-B1C7-48A8-AD35-FA6BDDED4F60.png" id="topLogo" alt="Логотип">
+
+    <h1>ШАЙҚАСТЫ ТАҢДАҢЫЗ</h1>
+
+    <nav id="battleNav">
+      <a href="#" class="locked" data-desc="1729 жыл. Жоңғар шапқыншылығына қарсы ұлы жеңіс.">АҢЫРАҚАЙ<br>ШАЙҚАСЫ</a>
+      <a href="#" class="locked" data-desc="1726 жыл. Қазақ жасақтарының алғашқы ірі жеңісі.">БУЛАНТЫ<br>ШАЙҚАСЫ</a>
+      <a href="#" class="active" data-desc="1643 жыл. Жәңгір ханның 600 сарбазы 50 мың қолға қарсы.">ОРБҰЛАҚ<br>ШАЙҚАСЫ</a>
+      <a href="#" class="locked" data-desc="751 жыл. Орталық Азия тарихын өзгерткен ұлы шайқас.">АТЛАХ<br>ШАЙҚАСЫ</a>
+      <a href="#" class="locked" data-desc="1837-1847 жж. Кенесары ханның ұлт-азаттық көтерілісі.">КЕНЕСАРЫ<br>КӨТЕРІЛІСІ</a>
+      <div id="cursorHighlight"></div>
+    </nav>
+
+    <div id="infoText">Сипаттама осында пайда болады...</div>
+
+  </div>
+
+
+  <div id="mainContent" style="display: none;">
+    
+    <div class="lobby-header-row">
+      
+      <div class="header-left">
+        <div class="lobby-image-block">
+          <img src="copy_9ED7D146-B1C7-48A8-AD35-FA6BDDED4F60.png" alt="Logo" class="header-logo">
+        </div>
+
+        <div class="lobby-text-block">
+          <h2 class="lobby-main-title">ОЙЫН ТҮРІН ТАҢДАҢЫЗ</h2>
+          <p class="lobby-subtitle">
+            Таңдалған шайқас: <span class="highlight">ОРБҰЛАҚ ШАЙҚАСЫ</span>
+          </p>
+        </div>
+      </div>
+
+      <div class="header-right">
+        
+        <div class="settings-container" id="settingsBtn">
+          <span class="settings-text">Баптаулар</span>
+          <button class="settings-icon">⚙️</button>
+        </div>
+
+        <div class="settings-container" id="aboutBtn">
+          <span class="settings-text">Біз туралы</span>
+          <button class="settings-icon">ℹ️</button>
+        </div>
+
+      </div>
+    </div>
+
+    <div class="featured-row">
+      <a href="wikipedia.html" class="game-card featured-card" style="text-decoration: none; display: block; color: inherit;">
+        <div class="card-badge">ESSENTIAL</div>
+        <img src="images (1).jpeg" alt="Essential Game" class="card-bg">
+        <div class="card-overlay">
+          <h3>ВИКИПЕДИЯ</h3>
+          <p>Тарихи мәліметтер & Карта</p> 
+        </div>
+      </a>
+    </div>
+
+    <div class="section-divider"></div>
+
+    <div class="games-grid">
+      
+      <div class="game-card">
+        <a href="battle.html">
+        <div class="card-badge">TRENDING</div>
+        <img src="шайкас.jpg" alt="Game 1" class="card-bg">
+        <div class="card-overlay">
+          <h3>ОРБҰЛАҚ ШАЙҚАСЫ</h3>
+          <p>Тарихи шайқас режимі</p>
+        </div>
+        </a>
+      </div>
+
+      <div class="game-card">
+        <a href="battle2.html">
+        <img src="zKNG6ZKyZoc.jpg" alt="Game 2" class="card-bg">
+        <div class="card-overlay">
+          <h3>ЖЕКПЕ-ЖЕК</h3>
+          <p>Жоңғарларға қарсы</p>
+        </div>
+        </a>
+      </div>
+
+      <div class="game-card">
+        <a href="debate.html">
+        <div class="card-badge new">NEW</div>
+        <img src="зззз.webp" alt="Game 3" class="card-bg">
+        <div class="card-overlay">
+          <h3>Халық дауысы</h3>
+          <p>Халықтың ойы</p>
+        </div>
+        </a>
+      </div>
+
+      <div class="game-card">
+        <a href="quiz.html">
+        <img src="щщщ.webp" alt="Game 4" class="card-bg">
+        <div class="card-overlay">
+          <h3>СҰРАҚ-ЖАУАП</h3>
+          <p>Викторина</p>
+        </div>
+        </a>
+      </div>
+
+    </div>
+  </div>
+
+
+  <div id="settingsModal" class="modal-overlay">
+    <div class="modal-box">
+      <div class="modal-header">
+        <h2>БАПТАУЛАР</h2>
+        <span class="close-modal">&times;</span>
+      </div>
+      
+      <div class="modal-content">
+        <div class="setting-row">
+          <span>Нұсқаулықты қосу</span>
+          <label class="switch">
+            <input type="checkbox" checked>
+            <span class="slider round"></span>
+          </label>
+        </div>
+
+        <div class="divider"></div>
+
+        <button id="backToMenuBtn" class="modal-btn">Терезені жабу</button>
+      </div>
+    </div>
+  </div>
+
+  <div id="aboutModal" class="modal-overlay">
+    <div class="modal-box">
+      <div class="modal-header">
+        <h2>БІЗ ТУРАЛЫ</h2>
+        <span class="close-modal">&times;</span>
+      </div>
+      
+      <div class="modal-content">
+        
+        <div class="authors-container">
+          
+          <div class="author-block">
+            <img src="WhatsApp Image 2025-12-08 at 21.09.06.jpeg" alt="Автор 1" class="author-photo">
+            <h3 class="author-name">ҚАЙЫРБЕК НҰРБЕК</h3>
+            <p class="author-bio">8B NIS IB</p>
+          </div>
+
+          <div class="author-block">
+            <img src="WhatsApp Image 2025-12-08 at 21.12.38.jpeg" alt="Автор 2" class="author-photo">
+            <h3 class="author-name">БИДАНОВ МАНСУР</h3>
+            <p class="author-bio">8B NIS IB</p>
+          </div>
+
+          <div class="author-block">
+            <img src="bkmzcbbb.png" alt="Автор 3" class="author-photo">
+            <h3 class="author-name">НИЯЗБЕКОВ ИЛЬЯС</h3>
+            <p class="author-bio">8B NIS IB</p>
+          </div>
+
+        </div>
+        
+      </div>
+    </div>
+  </div>
+
+  <script src="script.js"></script>
+
+</body>
+</html>
